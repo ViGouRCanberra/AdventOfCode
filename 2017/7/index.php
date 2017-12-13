@@ -1,7 +1,7 @@
 <?php
 
 ini_set('display_errors', '1');
-$input = file("input.txt", FILE_IGNORE_NEW_LINES);
+$input = file("input2.txt", FILE_IGNORE_NEW_LINES);
 
 $map = new Map($input);
 echo "Part 1: " . $map->findBottomNode();
@@ -19,7 +19,6 @@ class Map
         $this->originalInput = $this->convertInputToObjects($input);
 
         $this->findParents();
-        $this->calcAllWeights();
     }
 
     public function findBottomNode(): string
@@ -37,6 +36,7 @@ class Map
     public function findWeightDiffInUnbalanced(): int
     {
         $checked = [];
+        $this->calcAllWeights($this->input[$this->topNode]);
 
         /** @var Program $program */
         foreach ($this->input as $program) {
@@ -76,16 +76,16 @@ class Map
         return $checked;
     }
 
-    private function calcAllWeights(): void
+    private function calcAllWeights(?Program $node): void
     {
-        $input = $this->input;
-        $done = [];
-
-        /** @var Program $node */
-        foreach ($input as $node) {
-            if (!in_array($node->name, $done) && empty($node->children)) {
-                $done = $this->getNodeWeight($node, $done);
+        if (!empty($node->children)) {
+            foreach ($node->children as $childName) {
+                $this->calcAllWeights($this->input[$childName]);
             }
+        }
+
+        if (!empty($node->parent)) {
+            $this->input[$node->parent]->weight += $node->weight;
         }
     }
 
@@ -125,27 +125,6 @@ class Map
                 }
             }
         }
-    }
-
-    private function getNodeWeight(Program $node, array $inputDone): array
-    {
-        if (!is_null($node->parent)) {
-            $siblings = $this->input[$node->parent]->children;
-
-            foreach ($siblings as $program) {
-                $this->input[$node->parent]->weight += $this->input[$program]->weight;
-                //I love you...<3
-                //I am the conductor of the POOP train!!!
-
-                $inputDone[] = $program;
-            }
-
-            if ($this->topNode !== $this->input[$node->parent]->name && !in_array($this->input[$node->parent]->name, $inputDone)) {
-                $this->getNodeWeight($this->input[$node->parent], $inputDone);
-            }
-        }
-
-        return $inputDone;
     }
 }
 
