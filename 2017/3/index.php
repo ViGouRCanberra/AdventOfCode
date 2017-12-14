@@ -1,4 +1,10 @@
 <?php
+/*
+ * DISCLAIMER:
+ * Yes I was frustrated after a while, please don't judge the code.
+ * Yes, part 1 was broken in the attempt on part 2 and I didn't want to fix part 1
+ * because Borderlands 2 was much more tempting..
+ */
 //ini_set('display_errors', '1');
 
 //$input = 1; //0
