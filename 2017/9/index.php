@@ -6,12 +6,13 @@ $input = file("input.txt", FILE_IGNORE_NEW_LINES);
 $insRead = new StreamReader($input);
 
 echo "Part1: " . $insRead->getGroupScore();
-echo "<br/>Part2: ";
+echo "<br/>Part2: " . $insRead->getGarbageCount();
 
 class StreamReader
 {
     protected $cleanInput = [];
     protected $score = 0;
+    protected $garbageCount = 0;
 
     public function __construct($input)
     {
@@ -21,6 +22,11 @@ class StreamReader
     public function getGroupScore(): int
     {
         return $this->score;
+    }
+
+    public function getGarbageCount(): int
+    {
+        return $this->garbageCount;
     }
 
     private function cleanUpInput($input)
@@ -33,6 +39,10 @@ class StreamReader
             $char = $input[$i];
 
             if ($this->isNotCancelled($input, $i)) {
+                if ($garbageZone) {
+                    $this->countGarbage($input, $i);
+                }
+
                 switch ($char) {
                     case '!':
                         break;
@@ -40,6 +50,7 @@ class StreamReader
                         $garbageZone = true;
                         break;
                     case '>':
+                        --$this->garbageCount;
                         $garbageZone = false;
                         break;
                     case '{':
@@ -65,6 +76,16 @@ class StreamReader
                     $bracketCount = 0;
                 }
             }
+        }
+    }
+
+    private function countGarbage($input, $i): void
+    {
+        $current = $input[$i];
+        $next = strlen($input) < ($i+1) ? $input[$i+1] : '';
+
+        if ('!' != $current && '!' != $next) {
+            ++$this->garbageCount;
         }
     }
 
