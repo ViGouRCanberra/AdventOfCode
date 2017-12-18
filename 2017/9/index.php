@@ -2,7 +2,6 @@
 
 ini_set('display_errors', '1');
 $input = file("input.txt", FILE_IGNORE_NEW_LINES);
-//$input= ['{a!{}{{}<{}!>{}>{}}}{<!!!><!a!>!!!r<!!>}'];
 
 $insRead = new StreamReader($input);
 
@@ -21,8 +20,6 @@ class StreamReader
 
     public function getGroupScore(): int
     {
-        var_dump($this->cleanInput);
-
         return $this->score;
     }
 
@@ -34,10 +31,8 @@ class StreamReader
 
         for ($i = 0; $i < strlen($input); $i++) {
             $char = $input[$i];
-            $prevChar = 0 <= ($i-1) ? $input[$i-1] : '';
-            $prevPrevChar = 0 <= ($i-2) ? $input[$i-2] : '';
 
-            if ('!' != $prevChar || ('!' == $prevChar && '!' == $prevPrevChar)) {
+            if ($this->isNotCancelled($input, $i)) {
                 switch ($char) {
                     case '!':
                         break;
@@ -78,5 +73,24 @@ class StreamReader
         $cleanString .= $char;
 
         return $cleanString;
+    }
+
+    private function isNotCancelled(string $input, int $i): bool
+    {
+        $counter = $i;
+        $exclamationCount = 0;
+
+        while (true) {
+            --$counter;
+            $char = 0 <= $counter ? $input[$counter] : '';
+
+            if ('!' == $char) {
+                ++$exclamationCount;
+            } else {
+                break;
+            }
+        }
+
+        return $exclamationCount % 2 == 0;
     }
 }
