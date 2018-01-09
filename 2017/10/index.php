@@ -3,14 +3,14 @@
 ini_set('display_errors', '1');
 $input = file("input.txt", FILE_IGNORE_NEW_LINES);
 
-$insRead = new Hash($input);
+$hash = new Hash($input);
 
-echo "Part1: ";
+echo "Part1: " . $hash->getMultipleOfFirstTwo();
 echo "<br/>Part2: ";
 
 class Hash
 {
-    const LENGTH = 5;
+    const LENGTH = 256;
     protected $string = [];
     protected $lengthSequence;
     protected $currentNode = 0;
@@ -23,7 +23,12 @@ class Hash
         $this->buildString();
         $this->processHash();
 
-        $this->printString();
+        //$this->printString();
+    }
+
+    public function getMultipleOfFirstTwo()
+    {
+        return $this->string[0] * $this->string[1];
     }
 
     private function buildString(): void
@@ -79,13 +84,9 @@ class Hash
 
     private function currentPosition(int $modifier = 0, int $length = self::LENGTH): int
     {
-        $nodePos = ($this->currentNode + $modifier + 1) / $length;
+        $nodePos = ($modifier + $this->currentNode + 1) % $length;
 
-        $nodePos = $nodePos - floor($nodePos);
-        $nodePos = $nodePos * $length;
-        $position =  $nodePos - 1;
-
-        return $nodePos > 0 ? $position : $length - 1;
+        return ($nodePos - 1) > -1 ? $nodePos - 1 : $length - 1;
     }
 
     private function printString(): void
@@ -93,7 +94,5 @@ class Hash
         foreach ($this->string as $node) {
             var_dump($node);
         }
-
-        echo "Current Node: " . $this->string[$this->currentNode] . "<br/>";
     }
 }
