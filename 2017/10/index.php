@@ -10,7 +10,7 @@ echo "<br/>Part2: ";
 
 class Hash
 {
-    const LENGTH = 6;
+    const LENGTH = 5;
     protected $string = [];
     protected $lengthSequence;
     protected $currentNode = 0;
@@ -37,7 +37,6 @@ class Hash
     {
         foreach ($this->lengthSequence as $span) {
             $this->twistString((int) $span);
-
             $this->skipNodes((int) $span);
         }
     }
@@ -45,14 +44,48 @@ class Hash
     private function skipNodes(int $span): void
     {
         $this->currentNode += $this->skipSize;
-        $this->currentNode += $span;
+
+        $this->currentNode = $this->currentPosition($span);
 
         ++$this->skipSize;
     }
 
-    private function twistString(int $param): void
+    private function twistString(int $span): void
     {
+        $pinchedString = $this->getPartOfString($span);
 
+        $this->reinsertTwistedString(array_reverse($pinchedString));
+    }
+
+    private function getPartOfString($span): array
+    {
+        $partial = [];
+
+        for ($i = 0; $i < $span; $i++) {
+            $position = $this->currentPosition($i);
+            $partial[] = $this->string[$position];
+        }
+
+        return $partial;
+    }
+
+    private function reinsertTwistedString(array $reversedArray)
+    {
+        for ($i = 0; $i < sizeof($reversedArray); $i++) {
+            $position = $this->currentPosition($i);
+            $this->string[$position] = $reversedArray[$i];
+        }
+    }
+
+    private function currentPosition(int $modifier = 0, int $length = self::LENGTH): int
+    {
+        $nodePos = ($this->currentNode + $modifier + 1) / $length;
+
+        $nodePos = $nodePos - floor($nodePos);
+        $nodePos = $nodePos * $length;
+        $position =  $nodePos - 1;
+
+        return $nodePos > 0 ? $position : $length - 1;
     }
 
     private function printString(): void
@@ -60,5 +93,7 @@ class Hash
         foreach ($this->string as $node) {
             var_dump($node);
         }
+
+        echo "Current Node: " . $this->string[$this->currentNode] . "<br/>";
     }
 }
