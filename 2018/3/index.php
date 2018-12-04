@@ -9,13 +9,14 @@ $input = file("input.txt", FILE_IGNORE_NEW_LINES);
 //    '#3 @ 5,5: 2x2',
 //];
 
-$calc = new tardis($input);
+$calc = new Tardis($input);
 
 echo "Part1: " . $calc->getOverlappingSqInches();
-//echo "<br/>Part2: " . $calc->();
+echo "<br/>Part2: " . $calc->getCorrectPattern();
 
-class tardis {
+class Tardis {
     private $input;
+    private $patternedCanvas = [];
 
     public function __construct(array $input)
     {
@@ -30,7 +31,9 @@ class tardis {
         foreach ($this->cleanUpInput($this->input) as $pattern) {
             for ($column = 0; $column < $pattern['width']; ++$column ) {
                 for ($row = 0; $row < $pattern['height']; ++$row) {
-                    if (1 === sizeof($canvas[$column + $pattern['leftEdge']][$row + $pattern['topEdge']])) {
+                    $currentSquare = $canvas[$column + $pattern['leftEdge']][$row + $pattern['topEdge']];
+
+                    if (1 === sizeof($currentSquare)) {
                         ++$sqInches;
                     }
 
@@ -39,7 +42,35 @@ class tardis {
             }
         }
 
+        $this->patternedCanvas = $canvas;
+
         return $sqInches;
+    }
+
+    public function getCorrectPattern(): string
+    {
+        $patternWidth = sizeof($this->patternedCanvas);
+        $patternHeight = sizeof($this->patternedCanvas[0]);
+        $uniquePatterns = [];
+        $notUniquePatterns = [];
+
+        for ($column = 0; $column < $patternWidth; ++$column ) {
+            for ($row = 0; $row < $patternHeight; ++$row) {
+                $currentSquareIds = $this->patternedCanvas[$column][$row];
+
+                if (1 < sizeof($currentSquareIds)) {
+                    foreach ($currentSquareIds as $squareId) {
+                        if (!in_array($squareId, $notUniquePatterns)) {
+                            $notUniquePatterns[] = $squareId;
+                        }
+                    }
+                } elseif (!empty($currentSquareIds) && !in_array($currentSquareIds[0], $uniquePatterns)) {
+                    $uniquePatterns[] = $currentSquareIds[0];
+                }
+            }
+        }
+
+        return array_values(array_diff($uniquePatterns, $notUniquePatterns))[0] ?? 'Pattern not found';
     }
 
     private function drawEmptyCanvas(int $size = 1000): array
