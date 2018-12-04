@@ -3,11 +3,11 @@
 ini_set('display_errors', '1');
 $input = file("input.txt", FILE_IGNORE_NEW_LINES);
 
-$input = [
-    '#1 @ 1,3: 4x4',
-    '#2 @ 3,1: 4x4',
-    '#3 @ 5,5: 2x2',
-];
+//$input = [
+//    '#1 @ 1,3: 4x4',
+//    '#2 @ 3,1: 4x4',
+//    '#3 @ 5,5: 2x2',
+//];
 
 $calc = new tardis($input);
 
@@ -30,7 +30,7 @@ class tardis {
         foreach ($this->cleanUpInput($this->input) as $pattern) {
             for ($column = 0; $column < $pattern['width']; ++$column ) {
                 for ($row = 0; $row < $pattern['height']; ++$row) {
-                    if (!empty($canvas[$column + $pattern['leftEdge']][$row + $pattern['topEdge']])) {
+                    if (1 === sizeof($canvas[$column + $pattern['leftEdge']][$row + $pattern['topEdge']])) {
                         ++$sqInches;
                     }
 
@@ -53,7 +53,7 @@ class tardis {
     private function cleanUpInput($input)
     {
         for ($i = 0; $i < sizeof($input); ++$i) {
-            $values = preg_split('/#||( @ )||,||(: )||x/', $input[$i], -1, PREG_SPLIT_NO_EMPTY);
+            $values = preg_split('/[#( @ ),(: )x]/', $input[$i], -1, PREG_SPLIT_NO_EMPTY);
 
             $input[$i] = [
                 'id' => $values[0],
