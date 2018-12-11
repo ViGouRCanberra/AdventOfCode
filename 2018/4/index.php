@@ -6,8 +6,8 @@ $input = file("input.txt", FILE_IGNORE_NEW_LINES);
 
 $calc = new Tardis($input);
 
-echo "Part1: " . $calc->strategy1();
-//echo "<br/>Part2: " . $calc->();
+//echo "Part1: " . $calc->strategy1();
+echo "<br/>Part2: " . $calc->strategy2();
 
 class Tardis {
     private $input;
@@ -17,9 +17,11 @@ class Tardis {
     public function __construct(array $input)
     {
         $this->input = $this->orderInput($input);
+
+        $this->calculateTimetable();
     }
 
-    public function strategy1(): int
+    public function calculateTimetable(): void
     {
         $currentGuard = 0;
 
@@ -29,98 +31,45 @@ class Tardis {
 
             if ($match) {
                 $currentGuard = $guardMatch[0];
-                $this->guardTable[$currentGuard]['totalTime'] = $this->guardTable[$currentGuard]['totalTime'] ?? 0;
-                $this->guardTable[$currentGuard]['timeBar'][] = [];
             } else {
-                $this->calculateTotalHours($this->guardTable[$currentGuard], $timestamp, $entry);
+                if (strpos($entry, ' wakes up')) {
+                    $this->addMinutesAsleep($this->guardTable[$currentGuard], $timestamp);
+                }
             }
 
             $this->guardTable[$currentGuard]['currentTime'] = $timestamp;
         }
+    }
 
-        $longestAsleep = $this->getLongestAsleepGuard($this->guardTable);
-        $matchedHours = [];
+    public function strategy2(): int
+    {
+        $highestMinute = 0;
+        $maxGuard = 0;
+        $maxMinute = 0;
 
-        for ($i = 1; $i < sizeof($this->guardTable[$longestAsleep]['timeBar']); ++$i) {
+        foreach ($this->guardTable as $guard => $table) {
+            if (isset($table['timeBar'])) {
+                $guardMaxMinute = array_search(max($table['timeBar']), $table['timeBar']);
 
-            for ($j = 0; $j <= 60; ++$j) {
-                if (isset($this->guardTable[$longestAsleep]['timeBar'][$i][$j]) && isset($this->guardTable[$longestAsleep]['timeBar'][0][$j])) {
-                    if ('#' === $this->guardTable[$longestAsleep]['timeBar'][0][$j] && $this->guardTable[$longestAsleep]['timeBar'][$i][$j] === $this->guardTable[$longestAsleep]['timeBar'][0][$j]) {
-                        $matchedHours[] = $j;
-                    }
+                if ($table['timeBar'][$guardMaxMinute] > $highestMinute) {
+                    $highestMinute = $table['timeBar'][$guardMaxMinute];
+                    $maxGuard = $guard;
+                    $maxMinute = $guardMaxMinute;
                 }
             }
         }
 
-        $values = array_count_values($matchedHours);
-        arsort($values);
-
-        return $longestAsleep * (array_values(array_flip($values))[0] ?? 0);
+        return $maxGuard * $maxMinute;
     }
 
-    private function getLongestAsleepGuard(array $table): string
+    private function addMinutesAsleep(array &$guardTable, DateTime $timestamp): void
     {
-        $longestAsleep = 0;
-        $timeAsleep = 0;
+        $interval = $guardTable['currentTime']->diff($timestamp);
+        $startMinute = (int) $guardTable['currentTime']->format('i');
 
-        foreach ($table as $key => $guard) {
-            if ($timeAsleep < $guard['totalTime']) {
-                $longestAsleep = $key;
-                $timeAsleep = $guard['totalTime'];
-            }
-
-            foreach ($guard['timeBar'] as $timeKey => $timeBar) {
-                echo "Guard #$key: ";
-
-                foreach ($timeBar as $mark) {
-                    if ('x' === $mark) {
-                        array_shift($this->guardTable[$key]['timeBar'][$timeKey]);
-                    } else {
-                        echo "<div style='width: 10px;display: inline-block'>$mark</div>";
-                    }
-                }
-
-                echo '<br>';
-            }
-        }
-
-        return $longestAsleep;
-    }
-
-    private function calculateTotalHours(array &$guardEntry, DateTime $timestamp, string $entry): void
-    {
-        $diffDate = $guardEntry['currentTime']->diff($timestamp);
-
-        if (0 === sizeof($guardEntry['timeBar'][sizeof($guardEntry['timeBar'])-1])) {
-            $midnight = DateTime::createFromFormat("Y-m-d H:i", $guardEntry['currentTime']->format('Y-m-d') . '00:00');
-
-            if ('23' === $guardEntry['currentTime']->format('H')) {
-                $midnight->modify('+1 day');
-            }
-
-            $minutesToMidnight = $midnight->diff($guardEntry['currentTime'])->i;
-
-            if ($midnight > $guardEntry['currentTime']) {
-                $this->addMarkersToTimeBar($guardEntry['timeBar'], 'x', $minutesToMidnight);
-            } else {
-                $this->addMarkersToTimeBar($guardEntry['timeBar'], '.', $minutesToMidnight);
-            }
-        }
-
-        if (strpos($entry, ' wakes up')) {
-            $this->addMarkersToTimeBar($guardEntry['timeBar'], '#', $diffDate->i);
-            $guardEntry['totalTime'] += $diffDate->i;
-        } else {
-            $this->addMarkersToTimeBar($guardEntry['timeBar'], '.', $diffDate->i);
-        }
-    }
-
-    private function addMarkersToTimeBar(array &$timeBar, string $marker, int $minutes): void
-    {
-        $key = sizeof($timeBar)-1;
-
-        for ($i = 0; $i < $minutes; ++$i) {
-            $timeBar[$key][] = $marker;
+        for ($i = $startMinute; $i < ($interval->i + $startMinute); ++$i) {
+            $guardTable['timeBar'][$i] = $guardTable['timeBar'][$i] ?? 0;
+            $guardTable['timeBar'][$i] = ++$guardTable['timeBar'][$i];
         }
     }
 
