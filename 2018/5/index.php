@@ -7,7 +7,7 @@ $input = 'OeIiESsoMRtTjbBJYyTtrjJmeEPNliILnzEeZcCzYyZdevVEgGikKIfreEEeRkKFDpKkAL
 $calc = new Tardis();
 
 echo "Part1: " . $calc->reducePolymer($input) . PHP_EOL;
-//echo "<br/>Part2: " . $calc->();
+echo "<br/>Part2: " . $calc->reducAlphaReactions($input);
 
 class Tardis {
 
@@ -24,11 +24,40 @@ class Tardis {
             }
         }
 
-        return strlen($input);
+        return strlen($input) + 1;
+    }
+    
+    public function reducAlphaReactions($input): int
+    {
+        $possibleReactions = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+        $possiblePolymers = [];
+        
+        foreach ($possibleReactions as $identifier) {
+            $counter = 0;
+            $currentInput = $input;
+
+            while (isset($currentInput[$counter])) {
+                if ($this->checkForSpecifiedReaction($identifier, $currentInput, $counter)) {
+                    $currentInput = substr_replace($currentInput, '', $counter, 1);
+                    --$counter;
+                } else {
+                    ++$counter;
+                }
+            }
+
+            $possiblePolymers[$identifier] = $this->reducePolymer($currentInput);
+        }
+
+        return min($possiblePolymers);
     }
 
     private function checkForReaction(string $input, int $counter): bool
     {
         return strtolower($input[$counter]) === strtolower($input[$counter + 1]) && $input[$counter] !== $input[$counter + 1];
+    }
+
+    private function checkForSpecifiedReaction(string $identifier, string $input, int $counter): bool
+    {
+        return $identifier === strtolower($input[$counter]);
     }
 }
