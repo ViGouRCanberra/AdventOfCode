@@ -6,12 +6,15 @@ echo "High Score: " . $tardis->getHighScore() . PHP_EOL;
 
 class Tardis
 {
-    const TOTAL_MARBLES = 22;
-    const TOTAL_PLAYERS = 9;
+    const TOTAL_MARBLES = 70723;
+    const TOTAL_PLAYERS = 427;
 
-    public function getHighScore(): string
+    private $scores = [0];
+
+    public function getHighScore(): int
     {
         $currentPlayer = 1;
+
         $queue = new MarbleRing();
         $queue->add(0, new Marble(0));
         $queue->add(1, new Marble(2));
@@ -23,16 +26,16 @@ class Tardis
 
         for ($i = 4; self::TOTAL_MARBLES >= $i; ++$i) {
             if (0 === $i % 23) {
-                self::specialAddMarble($i, $queue);
+                self::specialAddMarble($i, $queue, $currentPlayer);
             } else {
                 self::normalAddMarble($i, $queue);
             }
 
             $currentPlayer = self::getNextPlayerNo($currentPlayer);
         }
-self::printQueue($queue);
+//self::printQueue($queue);
 
-        return 'poot';
+        return max($this->scores);
     }
 
     private function normalAddMarble(int $marbleNumber, MarbleRing $queue): void
@@ -42,9 +45,28 @@ self::printQueue($queue);
         $queue->add($queue->key(), new Marble($marbleNumber));
     }
 
-    private function specialAddMarble(int $marbleNumber, MarbleRing $queue): void
+    private function specialAddMarble(int $marbleNumber, MarbleRing $queue, int $currentPlayer): void
     {
+        self::addScore($currentPlayer, $marbleNumber);
 
+        $queue->prev();
+        $queue->prev();
+        $queue->prev();
+        $queue->prev();
+        $queue->prev();
+        $queue->prev();
+        $queue->prev();
+
+        self::addScore($currentPlayer, $queue->popCurrent()->getId());
+    }
+
+    private function addScore(int $currentPlayer, int $marbleNumber): void
+    {
+        if (!isset($this->scores[$currentPlayer])) {
+            $this->scores[$currentPlayer] = 0;
+        }
+
+        $this->scores[$currentPlayer] += $marbleNumber;
     }
 
     private function getNextPlayerNo(int $currentNo): int
@@ -113,6 +135,14 @@ class MarbleRing extends SplDoublyLinkedList
         }
 
         parent::add($index, $newval);
+    }
+
+    public function popCurrent(): Marble
+    {
+        $marble = self::offsetGet($this->index);
+        self::offsetUnset($this->index);
+
+        return $marble;
     }
 }
 
