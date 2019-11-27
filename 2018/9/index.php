@@ -2,70 +2,131 @@
 
 $tardis = new Tardis();
 
-echo "Part 1: " . $tardis->part1() . PHP_EOL;
+echo "High Score: " . $tardis->getHighScore() . PHP_EOL;
 
 class Tardis
 {
-    private $highestMarble = 25;
-    private $players = 9;
-    private $scores = [];
+    const TOTAL_MARBLES = 22;
+    const TOTAL_PLAYERS = 9;
 
-    public function part1()
+    public function getHighScore(): string
     {
-        $circle = [0, 2, 1, 3];
-        $currentPlayer = 3;
-        $coord = 3;
+        $currentPlayer = 1;
+        $queue = new MarbleRing();
+        $queue->add(0, new Marble(0));
+        $queue->add(1, new Marble(2));
+        $queue->add(2, new Marble(1));
+        $queue->add(3, new Marble(3));
+        $queue->next();
+        $queue->next();
+        $queue->next();
 
-        for ($i = 4; $i <= $this->highestMarble; ++$i) {
-            $currentPlayer = $this->getNextPlayer($currentPlayer);
-
-            if ($i % 23 === 0) {
-                $adjustments = $this->placeSpecialMarble($i, $circle, $coord, $currentPlayer);
+        for ($i = 4; self::TOTAL_MARBLES >= $i; ++$i) {
+            if (0 === $i % 23) {
+                self::specialAddMarble($i, $queue);
             } else {
-                $adjustments = $this->placeMarble($i, $circle, $coord);
+                self::normalAddMarble($i, $queue);
             }
 
-            $circle = $adjustments['circle'];
-            $coord = $adjustments['position'];
+            $currentPlayer = self::getNextPlayerNo($currentPlayer);
+        }
+self::printQueue($queue);
+
+        return 'poot';
+    }
+
+    private function normalAddMarble(int $marbleNumber, MarbleRing $queue): void
+    {
+        $queue->next();
+        $queue->next();
+        $queue->add($queue->key(), new Marble($marbleNumber));
+    }
+
+    private function specialAddMarble(int $marbleNumber, MarbleRing $queue): void
+    {
+
+    }
+
+    private function getNextPlayerNo(int $currentNo): int
+    {
+        return ++$currentNo > self::TOTAL_PLAYERS ? 1 : $currentNo;
+    }
+
+    private function printQueue(MarbleRing $queue): void
+    {
+        for ($i = 0; $i < $queue->count(); ++$i) {
+            if ($i === $queue->key()) {
+                echo '(';
+            }
+
+            echo $queue->offsetGet($i)->getId();
+
+            if ($i === $queue->key()) {
+                echo '), ';
+            } else {
+                echo ', ';
+            }
         }
 
-        return max($this->scores);
+        echo PHP_EOL;
+    }
+}
+
+class MarbleRing extends SplDoublyLinkedList
+{
+    private $index = 0;
+
+    public function next(): void
+    {
+        if (self::count() === self::key() + 1) {
+            $this->index = 0;
+
+            return;
+        }
+
+        ++$this->index;
     }
 
-    private function placeMarble(int $marble, array $circle, int $oldCoord): array
+    public function prev(): void
     {
-        $firstCoord = $oldCoord + 2;
-        $sizeofCircle = sizeof($circle);
-        $currentCoord = $firstCoord > $sizeofCircle ? $firstCoord - $sizeofCircle : $firstCoord;
+        if (0 === self::key()) {
+            $this->index = self::count() - 1;
 
-        array_splice($circle, $currentCoord, 0, $marble);
+            return;
+        }
 
-        return [
-            'circle' => $circle,
-            'position' => $currentCoord,
-        ];
+        --$this->index;
     }
 
-    private function placeSpecialMarble(int $marble, array $circle, int $oldCoord, int $currentPlayer): array
+    public function key(): int
     {
-        $currentCoord = $oldCoord - 7;
-        $currentCoord = $currentCoord < 0 ? sizeof($circle) + $currentCoord : $currentCoord;
-
-        $this->scores[$currentPlayer] = $this->scores[$currentPlayer] ?? 0;
-        $this->scores[$currentPlayer] += $marble + $circle[$currentCoord];
-
-        unset($circle[$currentCoord]);
-
-        return [
-            'circle' => array_values($circle),
-            'position' => $currentCoord
-        ];
+        return $this->index;
     }
 
-    private function getNextPlayer(int $player): int
+    public function add($index, $newval): void
     {
-        ++$player;
+        if (0 === $index) {
+            $this->index = self::count();
+            self::push($newval);
 
-        return $player > $this->players ? 1 : $player;
+            return;
+        }
+
+        parent::add($index, $newval);
+    }
+}
+
+class Marble
+{
+    private $id;
+
+    public function __construct(int $id)
+    {
+        $this->id = $id;
+    }
+
+    public function getId()
+    {
+        return $this->id;
     }
 }
