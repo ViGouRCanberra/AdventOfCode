@@ -35,9 +35,9 @@ class Tardis
 
             $currentPlayer = self::getNextPlayerNo($currentPlayer);
 
-echo (($i / 7072300) * 100) . "\r";
+echo round((($i / 7072300) * 100), 3) . "\r";
         }
-self::printQueue($queue);
+//self::printQueue($queue);
 
         return max($this->scores);
     }
