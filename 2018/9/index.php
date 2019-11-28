@@ -6,8 +6,10 @@ echo "High Score: " . $tardis->getHighScore() . PHP_EOL;
 
 class Tardis
 {
-    const TOTAL_MARBLES = 70723;
+    const TOTAL_MARBLES = 7072300;
+//    const TOTAL_MARBLES = 25;
     const TOTAL_PLAYERS = 427;
+//    const TOTAL_PLAYERS = 9;
 
     private $scores = [0];
 
@@ -32,8 +34,10 @@ class Tardis
             }
 
             $currentPlayer = self::getNextPlayerNo($currentPlayer);
+
+echo (($i / 7072300) * 100) . "\r";
         }
-//self::printQueue($queue);
+self::printQueue($queue);
 
         return max($this->scores);
     }
@@ -97,6 +101,7 @@ class Tardis
 class MarbleRing extends SplDoublyLinkedList
 {
     private $index = 0;
+    private $count = 0;
 
     public function next(): void
     {
@@ -134,15 +139,28 @@ class MarbleRing extends SplDoublyLinkedList
             return;
         }
 
+        ++$this->count;
         parent::add($index, $newval);
     }
 
     public function popCurrent(): Marble
     {
+        --$this->count;
         $marble = self::offsetGet($this->index);
         self::offsetUnset($this->index);
 
         return $marble;
+    }
+
+    public function push($value)
+    {
+        ++$this->count;
+        parent::push($value);
+    }
+
+    public function count(): int
+    {
+        return $this->count;
     }
 }
 
