@@ -37,7 +37,29 @@ class Space
 
     public function part2(array $input)
     {
-        return 0;
+        $target = 19690720;
+        $index = 0;
+        $current = $input[0];
+
+        self::restoreProgram($input);
+
+        while ($current != 99 && $input[0] !== $target) {
+            switch ($current) {
+                case 1:
+                    self::addUp(++$index, $input);
+                    break;
+                case 2:
+                    self::multiply(++$index, $input);
+                    break;
+                default:
+                    throw new \Exception('HOUSTON, WE HAVE A PROBLEM');
+            }
+
+            $index += 3;
+            $current = $input[$index];
+        }
+
+        return 100 * $input[1] + $input[2];
     }
 
     private function restoreProgram(array &$input): void
