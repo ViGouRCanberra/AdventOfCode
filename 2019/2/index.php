@@ -85,15 +85,16 @@ class Space
 
     private function restoreProgramCounter(array &$input): void
     {
-        if (100 === $this->verb) {
-            die("Part2: Not Found\n");
-        }
-
         if (99 === $this->noun) {
             $input[1] = $this->noun = 0;
             $input[2] = ++$this->verb;
+
+            if (100 === $this->verb) {
+                die("Part2: Not Found\n");
+            }
         }
 
+        $input[2] = $this->verb;
         $input[1] = ++$this->noun;
     }
 
