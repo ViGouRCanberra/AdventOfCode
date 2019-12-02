@@ -14,7 +14,7 @@ class Space
         $fuel = 0;
 
         foreach ($input as $amount) {
-            round($amount / 3)
+            $fuel += self::getReqFuel($amount);
         }
 
         return $fuel;
@@ -22,7 +22,32 @@ class Space
 
     public function part2(array $input)
     {
-        return '';
+        $totalFuel = 0;
+
+        foreach ($input as $amount) {
+            $fuel = self::getReqFuel($amount);
+            $fuelsFuel = self::getRecursiveFuel(0, $fuel);
+
+            $totalFuel += ($fuel + $fuelsFuel);
+        }
+
+        return $totalFuel;
+    }
+
+    private function getReqFuel(int $amount): int
+    {
+        return floor($amount / 3) - 2;
+    }
+
+    private function getRecursiveFuel(int $total, int $amount): int
+    {
+        if (0 >= $additional = self::getReqFuel($amount)) {
+            return $total;
+        }
+
+        $total += $additional;
+
+        return self::getRecursiveFuel($total, $additional);
     }
 }
 
