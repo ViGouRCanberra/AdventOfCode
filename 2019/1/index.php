@@ -45,9 +45,7 @@ class Space
             return $total;
         }
 
-        $total += $additional;
-
-        return self::getRecursiveFuel($total, $additional);
+        return self::getRecursiveFuel($total + $additional, $additional);
     }
 }
 
