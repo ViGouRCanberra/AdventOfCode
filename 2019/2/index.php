@@ -9,6 +9,9 @@ echo "Part2: " . $stars->part2($input) . PHP_EOL;
 
 class Space
 {
+    private $noun = 0;
+    private $verb = 0;
+
     public function part1(array $input): int
     {
         $index = 0;
@@ -25,7 +28,8 @@ class Space
                     self::multiply(++$index, $input);
                     break;
                 default:
-                    throw new \Exception('HOUSTON, WE HAVE A PROBLEM');
+                    echo "HOUSTON, WE HAVE A PROBLEM\n";
+                    return -1;
             }
 
             $index += 3;
@@ -38,12 +42,23 @@ class Space
     public function part2(array $input)
     {
         $target = 19690720;
+        $answer = self::repeatRun($input);
+
+        while ($target !== $answer[0]) {
+            $answer = self::repeatRun($input);
+        }
+
+        return 100 * $answer[1] + $answer[2];
+    }
+
+    private function repeatRun($input): array
+    {
         $index = 0;
         $current = $input[0];
 
-        self::restoreProgram($input);
+        self::restoreProgramCounter($input);
 
-        while ($current != 99 && $input[0] !== $target) {
+        while ($current != 99) {
             switch ($current) {
                 case 1:
                     self::addUp(++$index, $input);
@@ -52,20 +67,34 @@ class Space
                     self::multiply(++$index, $input);
                     break;
                 default:
-                    throw new \Exception('HOUSTON, WE HAVE A PROBLEM');
+                    die("Part2: HOUSTON, WE HAVE A PROBLEM\n");
             }
 
             $index += 3;
             $current = $input[$index];
         }
 
-        return 100 * $input[1] + $input[2];
+        return $input;
     }
 
     private function restoreProgram(array &$input): void
     {
         $input[1] = 12;
         $input[2] = 2;
+    }
+
+    private function restoreProgramCounter(array &$input): void
+    {
+        if (100 === $this->verb) {
+            die("Part2: Not Found\n");
+        }
+
+        if (99 === $this->noun) {
+            $input[1] = $this->noun = 0;
+            $input[2] = ++$this->verb;
+        }
+
+        $input[1] = ++$this->noun;
     }
 
     private function addUp(int $index, array &$input): void
