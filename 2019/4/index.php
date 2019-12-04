@@ -25,7 +25,7 @@ class Space
 
     public function part2(array $input)
     {
-        $validOptions = -1;
+        $validOptions = 0;
         $lower = $input[0];
         $upper = $input[1];
 
@@ -107,7 +107,6 @@ class Space
                             ++$i;
                         } if ($prevPrev !== $nextNext && ($prevPrev === $prev || $current === $nextNext)) {
                             $hasDoubleDigit = false;
-                            //++$i;
                         }
                     }
                 }
