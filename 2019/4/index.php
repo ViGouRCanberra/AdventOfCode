@@ -5,7 +5,7 @@ $stars = new Space();
 $input = file("input.txt", FILE_IGNORE_NEW_LINES);
 
 echo "Part1: " . $stars->part1($input) . PHP_EOL;
-echo "Part2: " . $stars->part2($input) . " -- Too low" . PHP_EOL;
+echo "Part2: " . $stars->part2($input) . PHP_EOL;
 
 class Space
 {
@@ -23,7 +23,7 @@ class Space
         return $validOptions;
     }
 
-    public function part2(array $input): int
+    public function part2(array $input)
     {
         $validOptions = -1;
         $lower = $input[0];
@@ -98,14 +98,17 @@ class Space
             if ($current === $prev) {
                 $hasDoubleDigit = true;
 
-                $prevPrev = $number[$i - 2] ?? null;
-                $nextNext = $number[$i + 1] ?? null;
+                if ($i > 1) {
+                    $prevPrev = $number[$i - 2] ?? null;
+                    $nextNext = $number[$i + 1] ?? null;
 
-                if (null !== $prevPrev && null !== $nextNext) {
-                    if ($prevPrev === $nextNext && $prev === $prevPrev) {
-                        ++$i;
-                    } else {
-                        $hasDoubleDigit = false;
+                    if (null !== $prevPrev && null !== $nextNext) {
+                        if ($prevPrev === $nextNext && $prev === $prevPrev) {
+                            ++$i;
+                        } if ($prevPrev !== $nextNext && ($prevPrev === $prev || $current === $nextNext)) {
+                            $hasDoubleDigit = false;
+                            //++$i;
+                        }
                     }
                 }
             }
