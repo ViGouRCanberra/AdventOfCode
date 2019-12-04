@@ -12,22 +12,22 @@ class Space
     public function part1(array $input): int
     {
         $validOptions = -1;
-        $lower = $input[0];
-        $upper = $input[1];
-
-        while ($lower < $upper) {
-            $lower = self::incrementPassword($lower);
-            ++$validOptions;
-        }
-
+//        $lower = $input[0];
+//        $upper = $input[1];
+//
+//        while ($lower < $upper) {
+//            $lower = self::incrementPassword($lower);
+//            ++$validOptions;
+//        }
+//
         return $validOptions;
     }
 
     public function part2(array $input)
     {
-        $validOptions = 0;
-        $lower = $input[0];
-        $upper = $input[1];
+        $validOptions = -1;
+        $lower = $input[0] + 1;
+        $upper = $input[1] - 1;
 
         while ($lower < $upper) {
             $lower = self::incrementSpecialPassword($lower);
@@ -35,6 +35,7 @@ class Space
         }
 
         return $validOptions;
+        return self::isNumberStillValid(799999);
     }
 
     private function incrementPassword(int $number): int
@@ -102,12 +103,12 @@ class Space
                     $prevPrev = $number[$i - 2] ?? null;
                     $nextNext = $number[$i + 1] ?? null;
 
-                    if (null !== $prevPrev && null !== $nextNext) {
-                        if ($prevPrev === $nextNext && $prev === $prevPrev) {
-                            ++$i;
-                        } if ($prevPrev !== $nextNext && ($prevPrev === $prev || $current === $nextNext)) {
-                            $hasDoubleDigit = false;
-                        }
+                    if (null !== $prevPrev && $prev === $prevPrev && null !== $nextNext) {
+                        $hasDoubleDigit = false;
+                    }
+
+                    if (null !== $nextNext && $current === $nextNext && null !== $prevPrev) {
+                        $hasDoubleDigit = false;
                     }
                 }
             }
