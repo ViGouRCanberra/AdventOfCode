@@ -12,14 +12,14 @@ class Space
     public function part1(array $input): int
     {
         $validOptions = -1;
-//        $lower = $input[0];
-//        $upper = $input[1];
-//
-//        while ($lower < $upper) {
-//            $lower = self::incrementPassword($lower);
-//            ++$validOptions;
-//        }
-//
+        $lower = $input[0];
+        $upper = $input[1];
+
+        while ($lower < $upper) {
+            $lower = self::incrementPassword($lower);
+            ++$validOptions;
+        }
+
         return $validOptions;
     }
 
@@ -30,12 +30,11 @@ class Space
         $upper = $input[1] - 1;
 
         while ($lower < $upper) {
-            $lower = self::incrementSpecialPassword($lower);
+            $lower = self::incrementSpecialPassword($lower, $upper);
             ++$validOptions;
         }
 
         return $validOptions;
-        return self::isNumberStillValid(799999);
     }
 
     private function incrementPassword(int $number): int
@@ -49,11 +48,11 @@ class Space
         return $number;
     }
 
-    private function incrementSpecialPassword(int $number): int
+    private function incrementSpecialPassword(int $number, int $upper): int
     {
         ++$number;
 
-        while (!self::isNumberStillValid($number)) {
+        while (!self::isNumberStillValid($number) && $number < $upper) {
             ++$number;
         }
 
@@ -87,7 +86,7 @@ class Space
     {
         $number = (string) $number;
         $prev = 0;
-        $hasDoubleDigit = false;
+        $doubleMap = [];
 
         for ($i = 0; $i < strlen($number); ++$i) {
             $current = $number[$i];
@@ -97,26 +96,16 @@ class Space
             }
 
             if ($current === $prev) {
-                $hasDoubleDigit = true;
-
-                if ($i > 1) {
-                    $prevPrev = $number[$i - 2] ?? null;
-                    $nextNext = $number[$i + 1] ?? null;
-
-                    if (null !== $prevPrev && $prev === $prevPrev && null !== $nextNext) {
-                        $hasDoubleDigit = false;
-                    }
-
-                    if (null !== $nextNext && $current === $nextNext && null !== $prevPrev) {
-                        $hasDoubleDigit = false;
-                    }
+                if (!array_key_exists($current, $doubleMap)) {
+                    $doubleMap[$current] = 1;
                 }
+
+                ++$doubleMap[$current];
             }
 
             $prev = $current;
         }
 
-        return $hasDoubleDigit;
+        return in_array(2, $doubleMap);
     }
 }
-;
