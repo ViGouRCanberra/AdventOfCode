@@ -11,7 +11,6 @@ class Space
 {
     private $noun = 0;
     private $verb = 0;
-    private $parameterMode = 0;
 
     public function part1(array $input): int
     {
@@ -42,8 +41,8 @@ class Space
         $opCode = new OpCode($current);
         ++$index; //TODO This might change...
 
-        while ($current != 99) { // TODO Pass instruction here
-            switch ($current) {
+        while ($opCode->getOpCode() != 99) { // TODO Pass instruction here
+            switch ($opCode->getOpCode()) {
                 case 1:
                     self::addUp($index, $input);
                     break;
@@ -120,8 +119,31 @@ class Space
 
 class OpCode
 {
+    private $increasePointerBy = 0;
+    private $opCode = 0;
+    private $parameters = [];
+
     public function __construct(int $current)
     {
+        $current = (string) $current;
+        $length = strlen($current);
 
+        $this->increasePointerBy = $length - 1;
+        $this->opCode = (int) ($current[$length - 2] . $current[$length - 1]);
+    }
+
+    public function getIncreasePointerBy(): int
+    {
+        return $this->increasePointerBy;
+    }
+
+    public function getOpCode(): int
+    {
+        return $this->opCode;
+    }
+
+    public function getParams(): array
+    {
+        return $this->parameters;
     }
 }
