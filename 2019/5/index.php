@@ -9,16 +9,15 @@ echo "Part2: " . $stars->part2($input) . PHP_EOL;
 
 class Space
 {
-    private $noun = 0;
-    private $verb = 0;
+    private int $noun = 0;
+    private int $verb = 0;
 
     public function part1(array $input): int
     {
-        $index = 0;
         $current = $input[0];
 
         self::restoreProgram($input);
-        self::run($current, $index, $input);
+        self::run($current, $input);
 
         return $input[0];
     }
@@ -35,42 +34,41 @@ class Space
         return 100 * $answer[1] + $answer[2];
     }
 
-    private function run(int $current, int $index, array $input): void
+    private function run(int $current, array $input): void
     {
-        // TODO break $current up into params
-        $opCode = new OpCode($current);
-        ++$index; //TODO This might change...
+        $pointer = 0;
+        $instruction = new Instruction($current);
+        $opCode = $instruction->getOpCode();
 
-        while ($opCode->getOpCode() != 99) { // TODO Pass instruction here
-            switch ($opCode->getOpCode()) {
+        while ($opCode != 99) {
+            switch ($opCode) {
                 case 1:
-                    self::addUp($index, $input);
+                    self::addUp($pointer, $input, $instruction);
                     break;
                 case 2:
-                    self::multiply($index, $input);
+                    self::multiply($pointer, $input, $instruction);
                     break;
                 case 3:
-                    self::move($index, $input);
+                    self::move($pointer, $input, $instruction);
                     break;
                 case 4:
-                    self::output($index, $input);
+                    self::output($pointer, $input, $instruction);
                     break;
                 default:
-                    die("HOUSTON, WE HAVE A PROBLEM\n");
+                    die("HOUSTON, WE HAVE A PROBLEM - opCode: $opCode (current: $current)\n");
             }
 
-            $index += 3;
-            $current = $input[$index];
+            $pointer += $instruction->getIncreasePointerBy();
+            $instruction = new Instruction($input[$pointer]);
         }
     }
 
     private function repeatRun(array $input): array
     {
-        $index = 0;
         $current = $input[0];
 
         self::restoreProgramCounter($input);
-        self::run($current, $index, $input);
+        self::run($current, $input);
 
         return $input;
     }
@@ -96,40 +94,48 @@ class Space
         $input[1] = ++$this->noun;
     }
 
-    private function addUp(int $index, array &$input): void
+    private function addUp(int $index, array &$input, Instruction $opCode): void
     {
-        $input[$input[$index + 2]] = $input[$input[$index]] + $input[$input[$index + 1]];
+        $param1 = $input[$input[$index + 1]];
+        $param2 = $input[$input[$index + 2]];
+
+        $input[$input[$index + 3]] = $param1 + $param2;
     }
 
-    private function multiply(int $index, array &$input): void
+    private function multiply(int $index, array &$input, Instruction $opCode): void
     {
-        $input[$input[$index + 2]] = $input[$input[$index]] * $input[$input[$index + 1]];
+        $param1 = $input[$input[$index + 1]];
+        $param2 = $input[$input[$index + 2]];
+
+        $input[$input[$index + 3]] = $param1 * $param2;
     }
 
-    private function move(int $index, array &$input): void
+    private function move(int $index, array &$input, Instruction $opCode): void
     {
-        $input[$input[$index + 1]] = $input[$index];
+        $param1 = $input[$index + 1];
+
+        $input[$input[$index + 2]] = $param1;
     }
 
-    private function output(int $index, array &$input): int
+    private function output(int $index, array &$input, Instruction $opCode): int
     {
-        return $input[$input[$index + 1]];
+        return $input[$input[$index + 2]];
     }
 }
 
-class OpCode
+class Instruction
 {
-    private $increasePointerBy = 0;
-    private $opCode = 0;
-    private $parameters = [];
+    private int $increasePointerBy = 0;
+    private int $opCode = 0;
+    private array $parameters = [];
 
     public function __construct(int $current)
     {
         $current = (string) $current;
         $length = strlen($current);
 
-        $this->increasePointerBy = $length - 1;
-        $this->opCode = (int) ($current[$length - 2] . $current[$length - 1]);
+        $this->increasePointerBy = $length;
+        $this->opCode = 1 === $length ? $current : (int) ($current[$length - 2] . $current[$length - 1]);
     }
 
     public function getIncreasePointerBy(): int
