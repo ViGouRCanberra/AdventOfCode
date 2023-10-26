@@ -1,2 +1,2 @@
 # AdventOfCode
-Advent of code challange located at - https://adventofcode.com
+Advent of code challenge located at - https://adventofcode.com
